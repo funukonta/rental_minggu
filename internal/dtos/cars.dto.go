@@ -15,3 +15,12 @@ func (c *CreateCarReq) Normalize() {
 		c.Status = true
 	}
 }
+
+type UpdateCarReq struct {
+	Model     string  `json:"model"`
+	DailyRate float64 `json:"daily_rate"`
+	Status    bool    `json:"status"`
+	Color     string  `json:"color"`
+	Make      string  `json:"make"`
+	Year      int     `json:"year"`
+}

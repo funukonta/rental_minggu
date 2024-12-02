@@ -24,7 +24,7 @@ func ConnectToMysql() *gorm.DB {
 		return nil
 	}
 
-	db.AutoMigrate(&models.Users{}, &models.Cars{})
+	db.AutoMigrate(&models.Users{}, &models.Cars{}, &models.Booking{})
 
 	return db
 }

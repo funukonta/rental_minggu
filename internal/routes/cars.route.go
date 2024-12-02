@@ -17,6 +17,11 @@ func CarsRoutes(r *gin.Engine, db *gorm.DB) {
 	carsRoute := r.Group("/cars")
 	{
 		carsRoute.POST("", handler.CreateCar)
-		carsRoute.PUT(":id")
+		carsRoute.GET(":id", handler.GetCar) // localhost:8080/cars/id
+		carsRoute.GET("", handler.GetCars)
+
+		carsRoute.PUT(":id", handler.UpdateCar)
+		carsRoute.DELETE(":id", handler.DeleteCar)
+
 	}
 }

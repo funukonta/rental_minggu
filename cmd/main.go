@@ -27,6 +27,7 @@ func main() {
 	// Routes
 	routes.UserRoutes(r, db)
 	routes.CarsRoutes(r, db)
+	routes.BookingRoutes(r, db)
 
 	r.Run()
 }
