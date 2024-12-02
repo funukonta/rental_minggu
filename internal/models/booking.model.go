@@ -36,3 +36,8 @@ func (c *Booking) BeforeCreate(db *gorm.DB) error {
 	c.GenerateUUID("ob")
 	return nil
 }
+
+type BookingWhere struct { // yang bisa di where di table Booking
+	ID     string
+	UserID string
+}

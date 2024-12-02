@@ -15,9 +15,11 @@ func BookingRoutes(r *gin.Engine, db *gorm.DB) {
 	serv := services.NewServiceBooking(repo, repoCar)
 	handler := handlers.NewHandlerBooking(serv)
 
-	bookingRoute := r.Group("/booking")
+	bookingRoute := r.Group("/bookings")
 	{
 		bookingRoute.POST("", handler.CreateBooking)
-
+		bookingRoute.GET("", handler.GetBookings)
+		bookingRoute.GET(":id", handler.GetBooking)
+		bookingRoute.PUT(":id", handler.UpdateBooking)
 	}
 }

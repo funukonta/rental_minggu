@@ -64,3 +64,129 @@ func (s *ServiceBooking) CreateBooking(req *dtos.CreateBookingReq) (*common.Resp
 
 	return resp, nil
 }
+
+func (s *ServiceBooking) GetBookings(userid string) (*common.RespList, error) {
+	bookings, err := s.BookingRepo.GetBookings(models.BookingWhere{
+		UserID: userid,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &common.RespList{
+		TotalItem: len(bookings),
+		Success:   false,
+		Message:   "-",
+		Data:      nil,
+	}
+
+	if len(bookings) == 0 {
+		resp.Message = "Tidak ada data"
+		return resp, nil
+	}
+
+	resp.TotalItem = len(bookings)
+	resp.Success = true
+	resp.Message = "Bookings exists"
+	resp.Data = bookings
+
+	return resp, nil
+}
+
+func (s *ServiceBooking) GetBooking(userid string, id string) (*common.RespDetail, error) {
+	booking, err := s.BookingRepo.GetBookingDetails(models.BookingWhere{
+		ID:     id,
+		UserID: userid,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &common.RespDetail{
+		Success: false,
+		Message: "-",
+		Data:    nil,
+	}
+
+	if booking.ID == "" {
+		resp.Message = "Tidak ada data"
+		return resp, nil
+	}
+
+	resp.Success = true
+	resp.Message = "Bookings exists"
+	resp.Data = booking
+
+	return resp, nil
+}
+func (s *ServiceBooking) UpdateBooking(userid string, id string, req *dtos.UpdateBookingReq) (*common.RespDetail, error) {
+
+	bookingBefore, err := s.BookingRepo.GetBookingDetails(models.BookingWhere{ID: id})
+	if err != nil {
+		return nil, err
+	}
+	car, err := s.carsRepo.GetCar(bookingBefore.CarsID)
+	if err != nil {
+		return nil, err
+	}
+
+	booking := &models.Booking{
+		CarsID:        req.CarsID,
+		UserID:        req.UserID,
+		Status:        req.Status,
+		PaymentMethod: req.PaymentMethod,
+	}
+
+	if req.StartDate != "" {
+		startDate, err := time.Parse("2006-01-02 15:04:05", req.StartDate)
+		if err != nil {
+			return nil, fmt.Errorf("time format error", err.Error())
+		}
+
+		totalNew := recalculateTotal(car.DailyRate, bookingBefore.EndDate, startDate)
+		if bookingBefore.TotalPrice != totalNew {
+			booking.TotalPrice = totalNew
+		}
+		booking.StartDate = startDate
+	}
+
+	if req.EndDate != "" {
+		endDate, err := time.Parse("2006-01-02 15:04:05", req.EndDate)
+		if err != nil {
+			return nil, fmt.Errorf("time format error", err.Error())
+		}
+
+		totalNew := recalculateTotal(car.DailyRate, endDate, bookingBefore.StartDate)
+		if bookingBefore.TotalPrice != totalNew {
+			booking.TotalPrice = totalNew
+		}
+		booking.EndDate = endDate
+	}
+
+	err = s.BookingRepo.UpdateBooking(id, booking)
+	if err != nil {
+		return nil, err
+	}
+
+	resp := &common.RespDetail{
+		Success: false,
+		Message: "-",
+		Data:    nil,
+	}
+
+	if booking.ID == "" {
+		resp.Message = "Tidak ada data"
+		return resp, nil
+	}
+
+	resp.Success = true
+	resp.Message = "Updated"
+	resp.Data = nil
+
+	return resp, nil
+}
+
+func recalculateTotal(rate float64, end, start time.Time) float64 {
+	dayElapse := math.Ceil(end.Sub(start).Hours() / 24)
+	return rate * dayElapse
+}
