@@ -24,8 +24,8 @@ type Booking struct {
 	Status        string    `json:"status"`
 	PaymentMethod string    `json:"payment_method"`
 
-	Cars Cars  `json:"car" gorm:"foreignKey:ID"`
-	User Users `json:"user" gorm:"foreignKey:ID"`
+	Car  Cars  `json:"car" gorm:"foreignKey:CarsID;references:id"`
+	User Users `json:"user" gorm:"foreignKey:UserID;references:id"`
 }
 
 func (c *Booking) TableName() string {

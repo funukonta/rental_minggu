@@ -20,7 +20,7 @@ func NewRepoBooking(db *gorm.DB) RepoBooking {
 
 func (r *repoBooking) Create(car *models.Booking) error {
 	db := r.dB.Create(&car)
-	db.Preload("Cars")
-	db.Preload("Users")
+	db.Preload("Car") // Note : samakan dengan field di Struct Booking, di Booking field ini Car bukan Cars
+	db.Preload("User").Find(&car)
 	return db.Error
 }
