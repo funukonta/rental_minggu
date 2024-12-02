@@ -2,11 +2,14 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"rentalMobil/internal/models"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func ConnectToMysql() *gorm.DB {
@@ -18,7 +21,19 @@ func ConnectToMysql() *gorm.DB {
 
 	// user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", dbUSER, dbPASWORD, dbHOST, dbPORT, dbDBNAME)
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+
+	newLogger := logger.New(
+		log.New(log.Writer(), "\r\n", log.LstdFlags), // Output to standard logger
+		logger.Config{
+			SlowThreshold: time.Second, // Log queries slower than this
+			LogLevel:      logger.Info, // Log level
+			Colorful:      true,        // Enable color output
+		},
+	)
+
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		Logger: newLogger,
+	})
 	if err != nil {
 		fmt.Println("Error : ", err.Error())
 		return nil
