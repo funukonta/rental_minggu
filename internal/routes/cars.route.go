@@ -4,6 +4,7 @@ import (
 	"rentalMobil/internal/handlers"
 	"rentalMobil/internal/repositories"
 	"rentalMobil/internal/services"
+	"rentalMobil/pkg/middleware"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -14,14 +15,14 @@ func CarsRoutes(r *gin.Engine, db *gorm.DB) {
 	serv := services.NewServiceCars(repo)
 	handler := handlers.NewHandlerCars(serv)
 
-	carsRoute := r.Group("/cars")
+	carsRoute := r.Group("/cars", middleware.AuthJWT())
 	{
-		carsRoute.POST("", handler.CreateCar)
+		carsRoute.POST("", middleware.MustAdmin(), handler.CreateCar)
 		carsRoute.GET(":id", handler.GetCar) // localhost:8080/cars/id
 		carsRoute.GET("", handler.GetCars)
 
-		carsRoute.PUT(":id", handler.UpdateCar)
-		carsRoute.DELETE(":id", handler.DeleteCar)
+		carsRoute.PUT(":id", middleware.MustAdmin(), handler.UpdateCar)
+		carsRoute.DELETE(":id", middleware.MustAdmin(), handler.DeleteCar)
 
 	}
 }
