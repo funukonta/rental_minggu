@@ -66,9 +66,11 @@ func (s *ServiceBooking) CreateBooking(req *dtos.CreateBookingReq) (*common.Resp
 }
 
 func (s *ServiceBooking) GetBookings(userid string) (*common.RespList, error) {
-	bookings, err := s.BookingRepo.GetBookings(models.BookingWhere{
-		UserID: userid,
-	})
+	where := models.BookingWhere{}
+	if userid != "" {
+		where.UserID = userid
+	}
+	bookings, err := s.BookingRepo.GetBookings(where)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func (s *ServiceBooking) GetBooking(userid string, id string) (*common.RespDetai
 		UserID: userid,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("not found")
 	}
 
 	resp := &common.RespDetail{
